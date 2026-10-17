@@ -1,0 +1,205 @@
+{
+  "domains": [
+    {
+      "name": "AI & Machine Learning",
+      "slug": "ai-machine-learning",
+      "description": "Large language models, generative AI, RAG pipelines, autonomous agents, and AI research papers.",
+      "icon": "cpu",
+      "color": "purple",
+      "order_index": 0,
+      "topics": [
+        {
+          "title": "LLMs & Prompt Engineering",
+          "slug": "llms-prompt-engineering",
+          "summary": "Core architectures of modern transformers, context window techniques, chain-of-thought, and prompt optimization.",
+          "status": "in_progress",
+          "importance": "core",
+          "drive_folder_url": "https://drive.google.com",
+          "order_index": 0,
+          "resources": [
+            {
+              "type": "youtube",
+              "title": "Andrej Karpathy: Intro to Large Language Models",
+              "url": "https://www.youtube.com/watch?v=zjkBMFhNj_g",
+              "notes": "Fundamental breakdown of pre-training, fine-tuning, RLHF, and practical applications of LLMs.",
+              "tags": ["LLM", "Karpathy", "Foundations"],
+              "is_favorite": true
+            },
+            {
+              "type": "note",
+              "title": "Prompt Engineering Frameworks & Mental Models",
+              "notes": "# Prompt Engineering Notes\n\n- **Role-Task-Constraint Pattern**: Always provide persona, explicit deliverables, and anti-patterns.\n- **Few-Shot Examples**: 2-3 concrete I/O pairs drastically improve output consistency.\n- **Chain-of-Thought (CoT)**: Ask the model to break down complex reasoning step-by-step before answering.",
+              "tags": ["Prompts", "Best Practices"],
+              "is_favorite": false
+            }
+          ]
+        },
+        {
+          "title": "RAG & Vector Databases",
+          "slug": "rag-vector-databases",
+          "summary": "Retrieval-Augmented Generation, chunking strategies, embeddings, dense retrieval, and rerankers.",
+          "status": "in_progress",
+          "importance": "high",
+          "drive_folder_url": "https://drive.google.com",
+          "order_index": 1,
+          "resources": [
+            {
+              "type": "youtube",
+              "title": "Building Production RAG Systems",
+              "url": "https://www.youtube.com/watch?v=tcqEUSNCn8I",
+              "notes": "Covers hierarchical chunking, hybrid search (BM25 + vector), and cross-encoder re-ranking.",
+              "tags": ["RAG", "Embeddings", "Search"],
+              "is_favorite": true
+            }
+          ]
+        },
+        {
+          "title": "AI Agents & Tool Use",
+          "slug": "ai-agents-tool-use",
+          "summary": "Autonomous agents, ReAct loop, tool/function calling, memory architectures, and multi-agent coordination.",
+          "status": "in_progress",
+          "importance": "high",
+          "drive_folder_url": "",
+          "order_index": 2,
+          "resources": []
+        }
+      ]
+    },
+    {
+      "name": "System Design & Architecture",
+      "slug": "system-design-architecture",
+      "description": "High-scale distributed systems, data partitioning, caching, message queues, and architectural patterns.",
+      "icon": "layers",
+      "color": "blue",
+      "order_index": 1,
+      "topics": [
+        {
+          "title": "Distributed Caching & Redis",
+          "slug": "distributed-caching-redis",
+          "summary": "Cache-aside, write-through, cache eviction policies (LRU/LFU), and distributed locking.",
+          "status": "mastered",
+          "importance": "core",
+          "drive_folder_url": "",
+          "order_index": 0,
+          "resources": [
+            {
+              "type": "note",
+              "title": "Cache Invalidation & Consistency Patterns",
+              "notes": "### Caching Principles\n- **Cache Aside (Lazy Loading)**: Application checks cache; if miss, fetches from DB and populates cache.\n- **Write Through**: Writes data to cache and DB synchronously.\n- **Thundering Herd**: Mitigate using mutex locks or probabilistic early expiration.",
+              "tags": ["Caching", "Redis", "Architecture"],
+              "is_favorite": true
+            }
+          ]
+        },
+        {
+          "title": "Message Queues & Event-Driven Systems",
+          "slug": "message-queues-event-driven",
+          "summary": "Kafka, RabbitMQ, at-least-once delivery, idempotency keys, and asynchronous processing.",
+          "status": "in_progress",
+          "importance": "high",
+          "drive_folder_url": "",
+          "order_index": 1,
+          "resources": []
+        }
+      ]
+    },
+    {
+      "name": "Backend Engineering",
+      "slug": "backend-engineering",
+      "description": "Python, API design, database modeling, async programming, and secure backend patterns.",
+      "icon": "server",
+      "color": "emerald",
+      "order_index": 2,
+      "topics": [
+        {
+          "title": "FastAPI & Modern Python",
+          "slug": "fastapi-modern-python",
+          "summary": "Async/await patterns, Pydantic data validation, dependency injection, and RESTful API standards.",
+          "status": "mastered",
+          "importance": "core",
+          "drive_folder_url": "",
+          "order_index": 0,
+          "resources": [
+            {
+              "type": "note",
+              "title": "FastAPI Dependency Injection & Clean Architecture",
+              "notes": "Always decouple database sessions and external services using FastAPI's `Depends` system for clean unit testing and modular routing.",
+              "tags": ["FastAPI", "Python", "API"],
+              "is_favorite": true
+            }
+          ]
+        },
+        {
+          "title": "SQL Databases & Query Optimization",
+          "slug": "sql-databases-optimization",
+          "summary": "PostgreSQL & SQLite indexing, EXPLAIN ANALYZE, transactions (ACID), and schema migration.",
+          "status": "in_progress",
+          "importance": "core",
+          "drive_folder_url": "",
+          "order_index": 1,
+          "resources": []
+        }
+      ]
+    },
+    {
+      "name": "Frontend & UI/UX",
+      "slug": "frontend-ui-ux",
+      "description": "Vue.js, reactive state, modern CSS/Tailwind, and intuitive developer-friendly interfaces.",
+      "icon": "layout",
+      "color": "amber",
+      "order_index": 3,
+      "topics": [
+        {
+          "title": "Vue 3 & Composition API",
+          "slug": "vue-3-composition-api",
+          "summary": "Reactive refs, computed properties, composable logic, and single-page application lifecycle.",
+          "status": "in_progress",
+          "importance": "high",
+          "drive_folder_url": "",
+          "order_index": 0,
+          "resources": []
+        }
+      ]
+    },
+    {
+      "name": "DevOps & Cloud Infrastructure",
+      "slug": "devops-cloud-infrastructure",
+      "description": "Docker containerization, CI/CD automation, cloud deployment, and monitoring.",
+      "icon": "cloud",
+      "color": "cyan",
+      "order_index": 4,
+      "topics": [
+        {
+          "title": "Docker & Container Workflows",
+          "slug": "docker-container-workflows",
+          "summary": "Multi-stage builds, docker-compose orchestration, volume management, and container security.",
+          "status": "in_progress",
+          "importance": "high",
+          "drive_folder_url": "",
+          "order_index": 0,
+          "resources": []
+        }
+      ]
+    },
+    {
+      "name": "Career & Interview Preparation",
+      "slug": "career-interview-prep",
+      "description": "System design interview guides, coding patterns, resume artifacts, and career milestones.",
+      "icon": "award",
+      "color": "rose",
+      "order_index": 5,
+      "topics": [
+        {
+          "title": "System Design Interview Playbook",
+          "slug": "system-design-interview-playbook",
+          "summary": "Step-by-step interview framework: requirements clarification, back-of-the-envelope estimations, high-level design, deep dives.",
+          "status": "in_progress",
+          "importance": "core",
+          "drive_folder_url": "https://drive.google.com",
+          "order_index": 0,
+          "resources": []
+        }
+      ]
+    }
+  ]
+}

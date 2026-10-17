@@ -1,0 +1,22 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large uploads (keep .gitkeep)
+static/uploads/*
+!static/uploads/.gitkeep

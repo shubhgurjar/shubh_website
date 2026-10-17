@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shubh's Software Engineering Knowledge Hub</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Vue 3 -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <!-- Marked.js for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="/static/css/custom.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased selection:bg-purple-600 selection:text-white">
+  <div id="app" v-cloak class="min-h-screen flex flex-col">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="sticky top-0 z-30 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        
+        <!-- Brand / Title -->
+        <div class="flex items-center gap-3 cursor-pointer" @click="resetFilters">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/25">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-indigo-300 to-white">
+              {{ siteTitle }}
+            </h1>
+            <p class="text-xs text-slate-400 flex items-center gap-1.5">
+              <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              SQLite Powered &bull; Private Career Vault
+            </p>
+          </div>
+        </div>
+
+        <!-- Global Search Bar -->
+        <div class="flex-1 max-w-md relative hidden md:block">
+          <div class="relative">
+            <svg class="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              v-model="searchQuery"
+              @input="handleSearchInput"
+              placeholder="Search domains, topics, YouTube, PDFs, notes..."
+              class="w-full pl-10 pr-4 py-2 bg-slate-800/80 hover:bg-slate-800 focus:bg-slate-900 border border-slate-700/80 focus:border-purple-500 rounded-lg text-sm text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all"
+            />
+            <button v-if="searchQuery" @click="searchQuery = ''; performSearch()" class="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-white">✕</button>
+          </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="flex items-center gap-2">
+          <!-- Add Resource Button -->
+          <button
+            @click="openAddResourceModal()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-purple-600/20 transition-all"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>Add Resource</span>
+          </button>
+
+          <!-- Backup Button -->
+          <button
+            @click="showBackupModal = true"
+            title="JSON Backup & Sync"
+            class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+          </button>
+
+          <!-- Settings / Auth Button -->
+          <button
+            @click="openSettingsModal"
+            title="Settings & Security"
+            class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-all"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- MAIN BODY -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+      <!-- BIRD'S EYE VIEW: STATS & OVERVIEW BAR -->
+      <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center gap-3">
+          <div class="p-3 bg-purple-500/10 text-purple-400 rounded-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-white">{{ domains.length }}</div>
+            <div class="text-xs text-slate-400">Knowledge Domains</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center gap-3">
+          <div class="p-3 bg-blue-500/10 text-blue-400 rounded-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-white">{{ totalTopics }}</div>
+            <div class="text-xs text-slate-400">Topics & Concepts</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center gap-3">
+          <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-white">{{ totalResources }}</div>
+            <div class="text-xs text-slate-400">Videos, PDFs & Drive</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 flex items-center gap-3">
+          <div class="p-3 bg-amber-500/10 text-amber-400 rounded-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+          <div>
+            <div class="text-2xl font-bold text-white">{{ masteredTopicsCount }} / {{ totalTopics }}</div>
+            <div class="text-xs text-slate-400">Mastered Topics</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- DOMAIN CARDS: BIRD'S EYE MATRIX -->
+      <section>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-slate-100 flex items-center gap-2">
+            <span>Career Domains</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">Bird's-Eye View</span>
+          </h2>
+          <button
+            @click="openDomainModal()"
+            class="text-xs text-purple-400 hover:text-purple-300 flex items-center gap-1 font-medium transition-colors"
+          >
+            <span>+ Add Domain</span>
+          </button>
+        </div>
+
+        <!-- Domains Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            v-for="domain in domains"
+            :key="domain.id"
+            @click="selectDomain(domain.id)"
+            :class="[
+              'p-5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group',
+              selectedDomainId === domain.id
+                ? 'bg-slate-800/90 border-purple-500 shadow-xl shadow-purple-500/10 ring-1 ring-purple-500'
+                : 'bg-slate-900/40 hover:bg-slate-900/80 border-slate-800 hover:border-slate-700'
+            ]"
+          >
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-3">
+                <span :class="['w-10 h-10 rounded-xl flex items-center justify-center font-bold text-lg', getDomainColorBadge(domain.color)]">
+                  {{ getDomainIconEmoji(domain.icon) }}
+                </span>
+                <div>
+                  <h3 class="font-bold text-slate-100 group-hover:text-purple-400 transition-colors">
+                    {{ domain.name }}
+                  </h3>
+                  <div class="text-xs text-slate-400">
+                    {{ domain.topic_count || 0 }} topics &bull; {{ domain.resource_count || 0 }} resources
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick action dots -->
+              <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" @click.stop>
+                <button @click="openDomainModal(domain)" title="Edit Domain" class="p-1 text-slate-400 hover:text-white">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+              {{ domain.description || 'No description provided.' }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- TOPICS & RESOURCES EXPLORER -->
+      <section class="space-y-4">
+        
+        <!-- Filter bar -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+          
+          <!-- Domain Tab Chips -->
+          <div class="flex items-center gap-2 overflow-x-auto max-w-full py-1">
+            <button
+              @click="selectDomain(null)"
+              :class="[
+                'px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all',
+                selectedDomainId === null
+                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/25'
+                  : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'
+              ]"
+            >
+              All Domains ({{ totalTopics }})
+            </button>
+            <button
+              v-for="d in domains"
+              :key="d.id"
+              @click="selectDomain(d.id)"
+              :class="[
+                'px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5',
+                selectedDomainId === d.id
+                  ? 'bg-purple-600 text-white shadow-md shadow-purple-600/25'
+                  : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'
+              ]"
+            >
+              <span>{{ getDomainIconEmoji(d.icon) }}</span>
+              <span>{{ d.name }}</span>
+            </button>
+          </div>
+
+          <!-- Secondary Filters & Add Topic -->
+          <div class="flex items-center gap-2 self-end sm:self-auto">
+            <!-- Resource Type Filter -->
+            <select
+              v-model="resourceTypeFilter"
+              class="px-2.5 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-xs text-slate-300 focus:outline-none focus:border-purple-500"
+            >
+              <option value="all">All Media</option>
+              <option value="youtube">YouTube Videos</option>
+              <option value="pdf">PDF Documents</option>
+              <option value="drive_folder">Google Drive Folders</option>
+              <option value="note">Personal Notes</option>
+            </select>
+
+            <!-- Favorites only toggle -->
+            <button
+              @click="onlyFavorites = !onlyFavorites"
+              :class="[
+                'p-1.5 rounded-lg border text-xs flex items-center gap-1 transition-all',
+                onlyFavorites ? 'bg-amber-500/20 text-amber-300 border-amber-500/50' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+              ]"
+              title="Show Favorites Only"
+            >
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            </button>
+
+            <!-- Add Topic Button -->
+            <button
+              @click="openTopicModal()"
+              class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg text-xs font-semibold flex items-center gap-1"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              <span>Add Topic</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- SEARCH RESULTS BANNER IF SEARCHING -->
+        <div v-if="searchQuery" class="p-3 bg-purple-950/40 border border-purple-800/60 rounded-xl flex items-center justify-between">
+          <div class="text-xs text-purple-200">
+            Showing search results for: <span class="font-bold underline">{{ searchQuery }}</span> ({{ searchResults.total_matches }} total matches)
+          </div>
+          <button @click="searchQuery = ''; performSearch()" class="text-xs text-purple-400 hover:text-white underline">Clear Search</button>
+        </div>
+
+        <!-- TOPICS LIST -->
+        <div v-if="filteredTopics.length === 0" class="text-center py-12 bg-slate-900/20 border border-dashed border-slate-800 rounded-2xl">
+          <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-800 flex items-center justify-center text-slate-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+          </div>
+          <h3 class="text-sm font-semibold text-slate-300">No topics found</h3>
+          <p class="text-xs text-slate-500 mt-1">Add a new topic or select a different domain above.</p>
+        </div>
+
+        <div v-else class="space-y-4">
+          <div
+            v-for="topic in filteredTopics"
+            :key="topic.id"
+            class="bg-slate-900/50 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700/80 transition-all shadow-sm"
+          >
+            <!-- Topic Header -->
+            <div class="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/60 bg-slate-900/80">
+              <div class="space-y-1">
+                <div class="flex items-center flex-wrap gap-2">
+                  <span :class="['text-xs font-semibold px-2 py-0.5 rounded-full', getStatusBadgeClass(topic.status)]">
+                    {{ formatStatus(topic.status) }}
+                  </span>
+                  <span v-if="topic.importance === 'core'" class="text-xs font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                    ★ Core SWE Skill
+                  </span>
+                  <span class="text-xs text-slate-400">
+                    in <strong class="text-slate-300">{{ topic.domain_name }}</strong>
+                  </span>
+                </div>
+                
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                  {{ topic.title }}
+                </h3>
+                
+                <p v-if="topic.summary" class="text-xs text-slate-400 leading-relaxed max-w-3xl">
+                  {{ topic.summary }}
+                </p>
+              </div>
+
+              <!-- Topic Action Buttons -->
+              <div class="flex items-center gap-2 flex-wrap">
+                <!-- Google Drive Folder Button -->
+                <a
+                  v-if="topic.drive_folder_url"
+                  :href="topic.drive_folder_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition-all shadow-sm"
+                  title="Open Topic Folder in Google Drive"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.71 3.5L1.15 15l3.43 6 6.55-11.5L7.71 3.5zm3.43 6l3.43 6h6.86L18 9.5h-6.86zm1.14 7.5L8.85 23h13.72l3.43-6H12.28z"/>
+                  </svg>
+                  <span>Google Drive Folder</span>
+                </a>
+
+                <!-- Add Resource to Topic -->
+                <button
+                  @click="openAddResourceModal(topic)"
+                  class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium border border-slate-700 flex items-center gap-1"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  <span>Add Resource</span>
+                </button>
+
+                <!-- Edit Topic -->
+                <button
+                  @click="openTopicModal(topic)"
+                  class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg border border-slate-700 text-xs"
+                  title="Edit Topic"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Attached Resources Grid -->
+            <div class="p-5">
+              <div v-if="getTopicResources(topic.id).length === 0" class="text-xs text-slate-500 py-2 italic flex items-center justify-between">
+                <span>No resources added yet. Click 'Add Resource' to attach YouTube videos, PDFs, or Drive links.</span>
+              </div>
+
+              <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div
+                  v-for="res in getTopicResources(topic.id)"
+                  :key="res.id"
+                  class="bg-slate-950/60 hover:bg-slate-950 border border-slate-800/80 hover:border-slate-700 rounded-xl p-3.5 flex flex-col justify-between gap-3 group transition-all"
+                >
+                  <!-- Resource Top Info -->
+                  <div class="space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="flex items-center gap-2">
+                        <span :class="['p-1.5 rounded-lg text-xs', getResourceTypeBadgeClass(res.type)]">
+                          {{ getResourceTypeIcon(res.type) }}
+                        </span>
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                          {{ res.type.replace('_', ' ') }}
+                        </span>
+                      </div>
+
+                      <!-- Favorite Star -->
+                      <button
+                        @click="toggleFavorite(res)"
+                        :class="['transition-colors', res.is_favorite ? 'text-amber-400' : 'text-slate-600 hover:text-slate-400']"
+                        title="Toggle Favorite"
+                      >
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- Title -->
+                    <h4 class="text-sm font-semibold text-white group-hover:text-purple-300 transition-colors line-clamp-2">
+                      {{ res.title }}
+                    </h4>
+
+                    <!-- YouTube Thumbnail if applicable -->
+                    <div
+                      v-if="res.type === 'youtube' && getYouTubeId(res.url)"
+                      class="relative rounded-lg overflow-hidden cursor-pointer aspect-video bg-black/40 group/thumb"
+                      @click="openYouTubeModal(res)"
+                    >
+                      <img
+                        :src="'https://img.youtube.com/vi/' + getYouTubeId(res.url) + '/mqdefault.jpg'"
+                        class="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform duration-300"
+                        alt="Thumbnail"
+                      />
+                      <div class="absolute inset-0 bg-black/30 flex items-center justify-center">
+                        <div class="w-10 h-10 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-lg group-hover/thumb:scale-110 transition-transform">
+                          ▶
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Tags -->
+                    <div v-if="res.tags && res.tags.length > 0" class="flex flex-wrap gap-1">
+                      <span
+                        v-for="tag in res.tags"
+                        :key="tag"
+                        class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700/60"
+                      >
+                        #{{ tag }}
+                      </span>
+                    </div>
+
+                    <!-- Notes preview if present -->
+                    <div v-if="res.notes" class="text-xs text-slate-400 bg-slate-900/70 p-2.5 rounded-lg line-clamp-3 leading-relaxed border border-slate-800/40">
+                      {{ res.notes.slice(0, 160) }}...
+                    </div>
+                  </div>
+
+                  <!-- Resource Footer Actions -->
+                  <div class="pt-2 border-t border-slate-800/60 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-1.5">
+                      <!-- Open YouTube Modal -->
+                      <button
+                        v-if="res.type === 'youtube'"
+                        @click="openYouTubeModal(res)"
+                        class="px-2.5 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-300 border border-red-500/30 rounded-lg text-xs font-medium flex items-center gap-1"
+                      >
+                        <span>▶ Watch & Notes</span>
+                      </button>
+
+                      <!-- Read PDF in Browser -->
+                      <button
+                        v-else-if="res.type === 'pdf'"
+                        @click="openPdfModal(res)"
+                        class="px-2.5 py-1 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-medium flex items-center gap-1"
+                      >
+                        <span>📄 Read PDF</span>
+                      </button>
+
+                      <!-- Open Drive Link -->
+                      <a
+                        v-else-if="res.type === 'drive_folder' || res.type === 'drive_file'"
+                        :href="res.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 rounded-lg text-xs font-medium flex items-center gap-1"
+                      >
+                        <span>Google Drive ↗</span>
+                      </a>
+
+                      <!-- Read Full Notes Modal -->
+                      <button
+                        v-else-if="res.notes"
+                        @click="openNoteModal(res)"
+                        class="px-2.5 py-1 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 rounded-lg text-xs font-medium flex items-center gap-1"
+                      >
+                        <span>📝 Read Notes</span>
+                      </button>
+
+                      <!-- External Web link -->
+                      <a
+                        v-if="res.url && res.type !== 'youtube' && !res.type.includes('drive')"
+                        :href="res.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="px-2 py-1 text-slate-400 hover:text-white text-xs flex items-center gap-1"
+                        title="Open External Link"
+                      >
+                        <span>Open ↗</span>
+                      </a>
+                    </div>
+
+                    <!-- Edit / Delete Resource -->
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button @click="openAddResourceModal(topic, res)" class="p-1 text-slate-400 hover:text-white" title="Edit Resource">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                      </button>
+                      <button @click="deleteResource(res)" class="p-1 text-rose-400 hover:text-rose-300" title="Delete Resource">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto border-t border-slate-900 bg-slate-950/80 py-6 text-center text-xs text-slate-500">
+      <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div>
+          Shubh's Software Engineering Knowledge Hub &bull; Local SQLite & Git Backup Ready
+        </div>
+        <div class="flex items-center gap-4 text-slate-400">
+          <button @click="showBackupModal = true" class="hover:text-white transition-colors">Export / Import JSON</button>
+          <span>&bull;</span>
+          <button @click="openSettingsModal" class="hover:text-white transition-colors">Master Password & Settings</button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- YOUTUBE & NOTES PLAYER MODAL -->
+    <div v-if="activeYouTubeResource" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <!-- Modal Header -->
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-red-600/20 text-red-400 rounded-lg text-xs">▶ YouTube Study Mode</span>
+            <h3 class="font-bold text-white text-sm line-clamp-1">{{ activeYouTubeResource.title }}</h3>
+          </div>
+          <button @click="activeYouTubeResource = null" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+        <!-- Modal Content: Video + Side Notes -->
+        <div class="flex-1 overflow-y-auto grid grid-cols-1 lg:grid-cols-3 gap-0">
+          <!-- Video Player -->
+          <div class="lg:col-span-2 bg-black flex items-center justify-center">
+            <div class="w-full aspect-video">
+              <iframe
+                :src="'https://www.youtube.com/embed/' + getYouTubeId(activeYouTubeResource.url) + '?autoplay=1'"
+                class="w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </div>
+          <!-- Side Notes & Key Takeaways -->
+          <div class="p-5 bg-slate-900/90 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Study Notes & Takeaways</h4>
+              <button
+                @click="openAddResourceModal(null, activeYouTubeResource)"
+                class="text-xs text-purple-400 hover:text-purple-300 font-medium"
+              >
+                Edit Notes
+              </button>
+            </div>
+            <div class="flex-1 prose prose-invert prose-xs text-slate-300 overflow-y-auto leading-relaxed markdown-body" v-html="renderMarkdown(activeYouTubeResource.notes || '*No notes recorded yet for this video.*')">
+            </div>
+            <div class="pt-4 mt-auto border-t border-slate-800 flex items-center justify-between">
+              <a :href="activeYouTubeResource.url" target="_blank" class="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+                Open in YouTube ↗
+              </a>
+              <button @click="toggleFavorite(activeYouTubeResource)" :class="activeYouTubeResource.is_favorite ? 'text-amber-400' : 'text-slate-400'">
+                ★ {{ activeYouTubeResource.is_favorite ? 'Favorited' : 'Favorite' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF VIEWER MODAL -->
+    <div v-if="activePdfResource" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-5xl h-[85vh] overflow-hidden shadow-2xl flex flex-col">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-rose-600/20 text-rose-400 rounded-lg text-xs">📄 In-Browser PDF Viewer</span>
+            <h3 class="font-bold text-white text-sm line-clamp-1">{{ activePdfResource.title }}</h3>
+          </div>
+          <div class="flex items-center gap-3">
+            <a :href="activePdfResource.url" download class="text-xs text-purple-400 hover:underline">Download</a>
+            <button @click="activePdfResource = null" class="text-slate-400 hover:text-white text-lg">✕</button>
+          </div>
+        </div>
+        <div class="flex-1 bg-slate-950">
+          <iframe :src="activePdfResource.url" class="w-full h-full" frameborder="0"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULL NOTE MODAL -->
+    <div v-if="activeNoteResource" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-purple-600/20 text-purple-400 rounded-lg text-xs">📝 Career Notes</span>
+            <h3 class="font-bold text-white text-sm">{{ activeNoteResource.title }}</h3>
+          </div>
+          <button @click="activeNoteResource = null" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+        <div class="p-6 overflow-y-auto flex-1 leading-relaxed markdown-body text-slate-200" v-html="renderMarkdown(activeNoteResource.notes || '')">
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD / EDIT RESOURCE MODAL -->
+    <div v-if="showResourceModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl p-6 space-y-4">
+        
+        <!-- Modal Header with Mode Switch -->
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-3">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span>{{ editingResource ? 'Edit Resource' : (resourceModalMode === 'bulk' ? '⚡ Quick Add Links' : 'Add Single Resource') }}</span>
+            </h3>
+            
+            <!-- Switch between Quick Bulk Paste & Single Item -->
+            <div v-if="!editingResource" class="flex bg-slate-800/80 p-0.5 rounded-lg border border-slate-700/80 text-xs">
+              <button
+                type="button"
+                @click="resourceModalMode = 'bulk'"
+                :class="[
+                  'px-2.5 py-1 rounded-md transition-all font-medium flex items-center gap-1',
+                  resourceModalMode === 'bulk' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                ]"
+              >
+                <span>⚡ Quick Bulk</span>
+              </button>
+              <button
+                type="button"
+                @click="resourceModalMode = 'single'"
+                :class="[
+                  'px-2.5 py-1 rounded-md transition-all font-medium flex items-center gap-1',
+                  resourceModalMode === 'single' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                ]"
+              >
+                <span>📝 Detailed Form</span>
+              </button>
+            </div>
+          </div>
+          <button @click="showResourceModal = false" class="text-slate-400 hover:text-white text-lg">✕</button>
+        </div>
+
+        <!-- ================= MODE 1: QUICK BULK PASTE (DEFAULT) ================= -->
+        <div v-if="resourceModalMode === 'bulk' && !editingResource" class="space-y-4 text-xs">
+          
+          <!-- Step 1: Select Domain -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+              <span>1. Choose Domain *</span>
+              <span class="text-slate-400 font-normal">Which category do these links belong to?</span>
+            </label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                v-for="d in domains"
+                :key="d.id"
+                @click="bulkDomainId = d.id"
+                :class="[
+                  'p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition-all',
+                  bulkDomainId === d.id
+                    ? 'bg-purple-600/20 border-purple-500 text-white ring-1 ring-purple-500 shadow-sm'
+                    : 'bg-slate-800/60 border-slate-700/80 text-slate-300 hover:bg-slate-800 hover:text-white'
+                ]"
+              >
+                <span class="text-base">{{ getDomainIconEmoji(d.icon) }}</span>
+                <span class="font-medium truncate">{{ d.name }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Optional Topic Under Domain -->
+          <div v-if="domainTopics.length > 0" class="pt-0.5">
+            <div class="flex items-center justify-between mb-1">
+              <label class="font-medium text-slate-400">
+                Topic under <strong class="text-slate-200">{{ selectedBulkDomainName }}</strong> (Optional)
+              </label>
+              <span class="text-[10px] text-slate-500">Auto-assigned if left blank</span>
+            </div>
+            <select
+              v-model="bulkTopicId"
+              class="w-full px-3 py-2 bg-slate-800/80 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500"
+            >
+              <option :value="null">Automatic (Add to {{ domainTopics[0]?.title || 'General' }})</option>
+              <option v-for="t in domainTopics" :key="t.id" :value="t.id">
+                {{ t.title }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Step 2: Select Type -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1.5">2. Choose Type *</label>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <button
+                type="button"
+                v-for="typeOpt in ['youtube', 'pdf', 'drive_folder', 'article', 'github']"
+                :key="typeOpt"
+                @click="bulkType = typeOpt"
+                :class="[
+                  'py-2 px-2.5 rounded-xl border text-center font-medium transition-all flex items-center justify-center gap-1.5',
+                  bulkType === typeOpt
+                    ? 'bg-purple-600 text-white border-purple-500 shadow-md shadow-purple-600/25 font-bold'
+                    : 'bg-slate-800/70 text-slate-300 border-slate-700 hover:bg-slate-800 hover:text-white'
+                ]"
+              >
+                <span>{{ getResourceTypeIcon(typeOpt) }}</span>
+                <span>{{ formatTypeLabel(typeOpt) }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Step 3: Paste Links Line by Line -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="font-semibold text-slate-300">
+                3. Paste Links (One Per Line) *
+              </label>
+              <span :class="['px-2 py-0.5 rounded-full text-[11px] font-semibold', bulkLinksCount > 0 ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'text-slate-500']">
+                {{ bulkLinksCount }} {{ bulkLinksCount === 1 ? 'link' : 'links' }} ready
+              </span>
+            </div>
+            <textarea
+              v-model="bulkLinksText"
+              rows="6"
+              :placeholder="getBulkPlaceholder(bulkType)"
+              class="w-full px-3.5 py-2.5 bg-slate-950/90 border border-slate-700 rounded-xl text-slate-200 font-mono text-xs focus:outline-none focus:border-purple-500 leading-relaxed shadow-inner"
+            ></textarea>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 mt-1">
+              <span>Titles and thumbnails are generated automatically!</span>
+              <span class="text-slate-400">Optional: <code>https://link | Title</code></span>
+            </div>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+            <button
+              type="button"
+              @click="showResourceModal = false"
+              class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg"
+            >
+              Cancel
+            </button>
+            
+            <button
+              type="button"
+              @click="submitBulkResources"
+              :disabled="bulkLinksCount === 0 || isSubmittingBulk"
+              :class="[
+                'px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-lg',
+                bulkLinksCount > 0 && !isSubmittingBulk
+                  ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-600/25 cursor-pointer'
+                  : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60'
+              ]"
+            >
+              <span v-if="isSubmittingBulk" class="animate-spin">⏳</span>
+              <span v-else>🚀</span>
+              <span>{{ isSubmittingBulk ? 'Adding...' : (bulkLinksCount > 0 ? `Add ${bulkLinksCount} ${formatTypeLabel(bulkType)} Links` : 'Add Links') }}</span>
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ================= MODE 2: SINGLE / DETAILED FORM ================= -->
+        <form v-else @submit.prevent="saveResource" class="space-y-4 text-xs">
+          <!-- Topic Selection -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Topic *</label>
+            <select v-model="resourceForm.topic_id" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500">
+              <option v-for="t in allTopics" :key="t.id" :value="t.id">
+                [{{ t.domain_name }}] &bull; {{ t.title }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Resource Type -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Resource Type *</label>
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+              <button
+                type="button"
+                v-for="typeOpt in ['youtube', 'pdf', 'drive_folder', 'drive_file', 'note', 'article']"
+                :key="typeOpt"
+                @click="resourceForm.type = typeOpt"
+                :class="[
+                  'py-2 rounded-lg border text-center transition-all',
+                  resourceForm.type === typeOpt
+                    ? 'bg-purple-600 text-white border-purple-500 font-bold'
+                    : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
+                ]"
+              >
+                {{ formatTypeLabel(typeOpt) }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Title -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Title *</label>
+            <input type="text" v-model="resourceForm.title" required placeholder="e.g. Andrej Karpathy LLM Architecture Breakdown" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+          </div>
+
+          <!-- URL / PDF Upload -->
+          <div v-if="resourceForm.type !== 'note'">
+            <div class="flex items-center justify-between mb-1">
+              <label class="font-semibold text-slate-300">
+                {{ resourceForm.type === 'pdf' ? 'PDF File / Link' : 'URL Link' }}
+              </label>
+              <span v-if="resourceForm.type === 'youtube'" class="text-[10px] text-purple-400">Auto-embeds player and thumbnail</span>
+            </div>
+            
+            <input
+              type="url"
+              v-model="resourceForm.url"
+              :placeholder="resourceForm.type === 'youtube' ? 'https://www.youtube.com/watch?v=...' : resourceForm.type.includes('drive') ? 'https://drive.google.com/drive/folders/...' : 'https://...'"
+              class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500 mb-2"
+            />
+
+            <!-- Direct PDF File Uploader -->
+            <div v-if="resourceForm.type === 'pdf'" class="p-3 bg-slate-950/80 border border-dashed border-slate-700 rounded-lg text-center space-y-1">
+              <input type="file" ref="pdfFileInput" @change="handleFileUpload" accept=".pdf,.doc,.docx" class="hidden" />
+              <button type="button" @click="$refs.pdfFileInput.click()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded text-xs border border-slate-700">
+                📁 Upload PDF From Computer
+              </button>
+              <div v-if="uploadStatus" class="text-[11px] text-emerald-400 mt-1">{{ uploadStatus }}</div>
+            </div>
+          </div>
+
+          <!-- Notes (Markdown) -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Personal Notes & Key Takeaways (Markdown Supported)</label>
+            <textarea
+              v-model="resourceForm.notes"
+              rows="5"
+              placeholder="Record your insights, code patterns, timestamp notes..."
+              class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 font-mono text-xs focus:outline-none focus:border-purple-500 leading-relaxed"
+            ></textarea>
+          </div>
+
+          <!-- Tags -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Tags (comma separated)</label>
+            <input type="text" v-model="resourceForm.tagsInput" placeholder="LLM, Transformer, Interview, System Design" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+          </div>
+
+          <!-- Favorite -->
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" id="fav_check" v-model="resourceForm.is_favorite" class="w-4 h-4 rounded text-purple-600 focus:ring-0 bg-slate-800 border-slate-700" />
+            <label for="fav_check" class="text-slate-300 font-medium">Pin to Favorites ★</label>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+            <button type="button" @click="showResourceModal = false" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">Cancel</button>
+            <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg shadow-md shadow-purple-600/20">
+              {{ editingResource ? 'Save Changes' : 'Create Resource' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ADD / EDIT TOPIC MODAL -->
+    <div v-if="showTopicModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <h3 class="text-base font-bold text-white">{{ editingTopic ? 'Edit Topic' : 'Add New Topic' }}</h3>
+          <button @click="showTopicModal = false" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form @submit.prevent="saveTopic" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Career Domain *</label>
+            <select v-model="topicForm.domain_id" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500">
+              <option v-for="d in domains" :key="d.id" :value="d.id">{{ d.name }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Topic Title *</label>
+            <input type="text" v-model="topicForm.title" required placeholder="e.g. RAG & Vector Databases" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Summary / Concept Overview</label>
+            <textarea v-model="topicForm.summary" rows="3" placeholder="Core ideas, architectures, key questions to test understanding..." class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Mastery Status</label>
+              <select v-model="topicForm.status" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500">
+                <option value="in_progress">In Progress</option>
+                <option value="mastered">Mastered</option>
+                <option value="reference">Reference Archive</option>
+                <option value="not_started">To Learn Next</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Importance</label>
+              <select v-model="topicForm.importance" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500">
+                <option value="core">Core SWE Skill</option>
+                <option value="high">High Priority</option>
+                <option value="medium">Medium Priority</option>
+                <option value="low">Nice to Have</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Google Drive Folder Link</label>
+            <input type="url" v-model="topicForm.drive_folder_url" placeholder="https://drive.google.com/drive/folders/..." class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+          </div>
+
+          <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+            <button v-if="editingTopic" type="button" @click="deleteTopic(editingTopic)" class="text-rose-400 hover:text-rose-300">
+              Delete Topic
+            </button>
+            <div v-else></div>
+
+            <div class="flex gap-2">
+              <button type="button" @click="showTopicModal = false" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+              <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg shadow-md shadow-purple-600/20">
+                {{ editingTopic ? 'Update Topic' : 'Create Topic' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ADD / EDIT DOMAIN MODAL -->
+    <div v-if="showDomainModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <h3 class="text-base font-bold text-white">{{ editingDomain ? 'Edit Domain' : 'Add New Domain' }}</h3>
+          <button @click="showDomainModal = false" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <form @submit.prevent="saveDomain" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Domain Name *</label>
+            <input type="text" v-model="domainForm.name" required placeholder="e.g. Distributed Systems" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+          </div>
+
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Description</label>
+            <textarea v-model="domainForm.description" rows="3" placeholder="Briefly describe what this career domain encompasses..." class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Color Theme</label>
+              <select v-model="domainForm.color" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500">
+                <option value="purple">Purple</option>
+                <option value="blue">Blue</option>
+                <option value="emerald">Emerald</option>
+                <option value="amber">Amber</option>
+                <option value="cyan">Cyan</option>
+                <option value="rose">Rose</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-slate-300 mb-1">Icon Style</label>
+              <select v-model="domainForm.icon" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500">
+                <option value="cpu">🧠 AI / Brain / CPU</option>
+                <option value="layers">🏗️ Architecture / Layers</option>
+                <option value="server">⚙️ Backend / Server</option>
+                <option value="layout">🎨 Frontend / UI</option>
+                <option value="cloud">☁️ Cloud / DevOps</option>
+                <option value="award">🎯 Career / Goals</option>
+                <option value="folder">📁 General Folder</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+            <button v-if="editingDomain" type="button" @click="deleteDomain(editingDomain)" class="text-rose-400 hover:text-rose-300">
+              Delete Domain
+            </button>
+            <div v-else></div>
+
+            <div class="flex gap-2">
+              <button type="button" @click="showDomainModal = false" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-lg">Cancel</button>
+              <button type="submit" class="px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg shadow-md shadow-purple-600/20">
+                {{ editingDomain ? 'Save Domain' : 'Create Domain' }}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- JSON BACKUP & RESTORE MODAL -->
+    <div v-if="showBackupModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-5">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="p-1.5 bg-purple-600/20 text-purple-400 rounded-lg text-xs">💾 Database & Backup</span>
+            <h3 class="text-base font-bold text-white">JSON Sync & GitHub Backup</h3>
+          </div>
+          <button @click="showBackupModal = false" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <p class="text-xs text-slate-400 leading-relaxed">
+          Your primary data is stored safely in a local SQLite database (<code class="text-purple-300">data/career_hub.db</code>).
+          You can download a clean JSON export anytime to commit to your GitHub repository or restore on another machine.
+        </p>
+
+        <!-- Export Section -->
+        <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-xl flex items-center justify-between">
+          <div>
+            <h4 class="text-xs font-bold text-white">Export to JSON</h4>
+            <p class="text-[11px] text-slate-400">Download all domains, topics, notes, and links</p>
+          </div>
+          <a
+            href="/api/backup/export"
+            download
+            class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-xs font-semibold shadow-md shadow-purple-600/20"
+          >
+            Download JSON
+          </a>
+        </div>
+
+        <!-- Import Section -->
+        <div class="p-4 bg-slate-950/80 border border-slate-800 rounded-xl space-y-3">
+          <div>
+            <h4 class="text-xs font-bold text-white">Restore / Import from JSON</h4>
+            <p class="text-[11px] text-slate-400">Select a previously exported JSON backup file</p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input type="file" ref="backupFileInput" accept=".json" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700" />
+            <select v-model="importMode" class="text-xs px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-300">
+              <option value="replace">Wipe & Replace</option>
+              <option value="merge">Append / Merge</option>
+            </select>
+          </div>
+
+          <button
+            @click="triggerBackupImport"
+            class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold"
+          >
+            Execute Import
+          </button>
+        </div>
+
+        <div v-if="backupMessage" :class="['text-xs text-center py-1 font-medium', backupMessage.type === 'error' ? 'text-rose-400' : 'text-emerald-400']">
+          {{ backupMessage.text }}
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS & SECURITY MODAL -->
+    <div v-if="showSettingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <h3 class="text-base font-bold text-white">App Settings & Security</h3>
+          <button @click="showSettingsModal = false" class="text-slate-400 hover:text-white">✕</button>
+        </div>
+
+        <div class="space-y-4 text-xs">
+          <!-- Site Title -->
+          <div>
+            <label class="block font-semibold text-slate-300 mb-1">Site Title</label>
+            <div class="flex gap-2">
+              <input type="text" v-model="siteTitleInput" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+              <button @click="saveSiteTitle" class="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-semibold">Save</button>
+            </div>
+          </div>
+
+          <!-- Change Master Password -->
+          <div class="pt-3 border-t border-slate-800 space-y-3">
+            <h4 class="font-bold text-white">Change Master Password</h4>
+            <div>
+              <label class="block text-slate-400 mb-1">Current Password</label>
+              <input type="password" v-model="passwordForm.current" placeholder="Default is: admin123" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">New Password</label>
+              <input type="password" v-model="passwordForm.new" placeholder="Enter new password" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+            </div>
+            <button @click="updateMasterPassword" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg font-semibold">
+              Update Password
+            </button>
+          </div>
+
+          <!-- Log In Prompt if session expired -->
+          <div v-if="!isAuthenticated" class="pt-3 border-t border-slate-800 space-y-2">
+            <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-300">
+              Session is currently locked. Enter master password to unlock editing.
+            </div>
+            <div class="flex gap-2">
+              <input type="password" v-model="loginPassword" placeholder="Master Password" class="flex-1 px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-slate-200 focus:outline-none focus:border-purple-500" />
+              <button @click="doLogin" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-semibold rounded-lg">Unlock</button>
+            </div>
+          </div>
+
+          <div v-if="settingsMessage" :class="['text-xs text-center font-medium', settingsMessage.type === 'error' ? 'text-rose-400' : 'text-emerald-400']">
+            {{ settingsMessage.text }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

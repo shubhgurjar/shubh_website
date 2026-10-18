@@ -32,6 +32,7 @@ Simply run the startup script:
 ```
 
 The script will automatically:
+
 1. Verify Python 3
 2. Create the virtual environment (`venv/`) if not already present
 3. Install required dependencies
@@ -102,6 +103,7 @@ shubh_website/
 ## 🔄 GitHub Sync & Backup
 
 To back up your data to GitHub:
+
 1. In the app header or footer, click **JSON Backup & Sync (💾)**.
 2. Click **Download JSON** to get an export file (e.g. `career_hub_backup_2026.json`).
 3. Commit this JSON file to your GitHub repository:
@@ -117,6 +119,7 @@ To back up your data to GitHub:
 ## ☁️ Publishing to the Web (Optional)
 
 When you're ready to host this online:
+
 1. Deploy to any Python host like **Render**, **Railway**, **Fly.io**, or an **AWS / DigitalOcean VPS**.
 2. Set the `CAREER_HUB_PASSWORD` environment variable.
 3. The site will automatically lock behind your master password so only you have access!
